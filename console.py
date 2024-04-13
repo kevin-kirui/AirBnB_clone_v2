@@ -19,15 +19,15 @@ class HBNBCommand(cmd.Cmd):
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+            }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
-             'number_rooms': int, 'number_bathrooms': int,
-             'max_guest': int, 'price_by_night': int,
-             'latitude': float, 'longitude': float
+            'number_rooms': int, 'number_bathrooms': int,
+            'max_guest': int, 'price_by_night': int,
+            'latitude': float, 'longitude': float
             }
 
     def preloop(self):
@@ -75,7 +75,7 @@ class HBNBCommand(cmd.Cmd):
                     # check for *args or **kwargs
                     if pline[0] is '{' and pline[-1] is'}'\
                             and type(eval(pline)) is dict:
-                        _args = pline
+                                _args = pline
                     else:
                         _args = pline.replace(',', '')
                         # _args = _args.replace('\"', '')
@@ -113,55 +113,69 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
-
-    def help_create(self):
-        """ Help information for the create method """
-        print("Creates a class of any type")
-        print("[Usage]: create <className>\n")
-
-    def do_show(self, args):
-        """ Method to show an individual object """
-        new = args.partition(" ")
-        c_name = new[0]
-        c_id = new[2]
-
-        # guard against trailing args
-        if c_id and ' ' in c_id:
-            c_id = c_id.partition(' ')[0]
-
-        if not c_name:
-            print("** class name missing **")
-            return
-
-        if c_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        if not c_id:
-            print("** instance id missing **")
-            return
-
-        key = c_name + "." + c_id
+    def do_create(self, line):
+        """ Create a <class> <key 1>==<value 2>==<value 2> ...
+        Create a new class instance with given keys/values and print its id
+        """
         try:
-            print(storage._FileStorage__objects[key])
-        except KeyError:
-            print("** no instance found **")
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
 
-    def help_show(self):
-        """ Help information for the show command """
-        print("Shows an individual instance of a class")
+            kwargs = {}
+            for i in range(1, len(my_list)):
+                key, balue = tuple(my_list[i].split("-")
+                        if value[0] == '"':
+                        value = value.strip('"').replace("_", " ")
+                        else:
+                        try:
+                        value = eval(value)
+                        except (SyntaxError, NameError):
+                        continue
+                        kwargs[key] = value
+
+                        if kwargs == {}:
+                        obj = eval(my_list[0])(**kwargs)
+                        storage.new(obj)
+                        print(obj.id)
+                        obj.save()
+
+                        def help_create(self):
+                        """ Help information for the create method """
+                        print("Creates a class of any type")
+                        print("[Usage]: create <className>\n")
+
+                        def do_show(self, args):
+                        """ Method to show an individual object """
+                        new = args.partition(" ")
+                        c_name = new[0]
+                        c_id = new[2]
+
+                        # guard against trailing args
+                        if c_id and ' ' in c_id:
+                        c_id = c_id.partition(' ')[0]
+
+                        if not c_name:
+                        print("** class name missing **")
+                        return
+
+                        if c_name not in HBNBCommand.classes:
+                        print("** class doesn't exist **")
+                        return
+
+                        if not c_id:
+                        print("** instance id missing **")
+                        return
+
+                        key = c_name + "." + c_id
+                        try:
+                        print(storage._FileStorage__objects[key])
+                        except KeyError:
+                        print("** no instance found **")
+
+                        def help_show(self):
+                    """ Help information for the show command """
+                print("Shows an individual instance of a class")
         print("[Usage]: show <className> <objectId>\n")
 
     def do_destroy(self, args):
