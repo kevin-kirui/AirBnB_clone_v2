@@ -114,69 +114,62 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, line):
-        """ Create a <class> <key 1>==<value 2>==<value 2> ...
-        Create a new class instance with given keys/values and print its id
-        """
-        try:
-            if not line:
-                raise SyntaxError()
-            my_list = line.split(" ")
+        """ Create a <class> <key1>=<value1> <key2>=<value2> ...
+    Create a new class instance with given keys/values and print its id
+    """
+    try:
+        if not line:
+            raise SyntaxError("Usage: create <Class name> <param1>=<value1> <param2>=<value2> ...")
 
-            kwargs = {}
-            for i in range(1, len(my_list)):
-                key, balue = tuple(my_list[i].split("-")
-                        if value[0] == '"':
-                        value = value.strip('"').replace("_", " ")
-                        else:
-                        try:
-                        value = eval(value)
-                        except (SyntaxError, NameError):
-                        continue
-                        kwargs[key] = value
+        # Split the input line by spaces
+        parts = line.split()
 
-                        if kwargs == {}:
-                        obj = eval(my_list[0])(**kwargs)
-                        storage.new(obj)
-                        print(obj.id)
-                        obj.save()
+        # Extract class name
+        class_name = parts[0]
 
-                        def help_create(self):
-                        """ Help information for the create method """
-                        print("Creates a class of any type")
-                        print("[Usage]: create <className>\n")
+        # Check if class exists
+        if class_name not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
 
-                        def do_show(self, args):
-                        """ Method to show an individual object """
-                        new = args.partition(" ")
-                        c_name = new[0]
-                        c_id = new[2]
+        # Extract parameters
+        params = {}
+        for item in parts[1:]:
+            try:
+                key, value = item.split('=')
 
-                        # guard against trailing args
-                        if c_id and ' ' in c_id:
-                        c_id = c_id.partition(' ')[0]
+                # Process value according to its type
+                if value.startswith('"') and value.endswith('"'):
+                    # String value
+                    value = value[1:-1].replace("_", " ").replace('\\"', '"')
+                elif '.' in value:
+                    # Float value
+                    value = float(value)
+                else:
+                    # Integer value
+                    value = int(value)
 
-                        if not c_name:
-                        print("** class name missing **")
-                        return
+                # Add key-value pair to params dictionary
+                params[key] = value
+            except ValueError:
+                # Skip if parameter can't be recognized
+                continue
 
-                        if c_name not in HBNBCommand.classes:
-                        print("** class doesn't exist **")
-                        return
+        # Create class instance with given parameters
+        obj = HBNBCommand.classes[class_name](**params)
 
-                        if not c_id:
-                        print("** instance id missing **")
-                        return
+        # Add object to storage
+        storage.new(obj)
+        storage.save()
 
-                        key = c_name + "." + c_id
-                        try:
-                        print(storage._FileStorage__objects[key])
-                        except KeyError:
-                        print("** no instance found **")
+        # Print object id
+        print(obj.id)
 
-                        def help_show(self):
-                    """ Help information for the show command """
-                print("Shows an individual instance of a class")
-        print("[Usage]: show <className> <objectId>\n")
+    except SyntaxError as e:
+        print(e)
+    except Exception as e:
+        print("Error:", e)
+
 
     def do_destroy(self, args):
         """ Destroys a specified object """
