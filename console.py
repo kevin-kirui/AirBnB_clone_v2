@@ -19,15 +19,15 @@ class HBNBCommand(cmd.Cmd):
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+            }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
-             'number_rooms': int, 'number_bathrooms': int,
-             'max_guest': int, 'price_by_night': int,
-             'latitude': float, 'longitude': float
+            'number_rooms': int, 'number_bathrooms': int,
+            'max_guest': int, 'price_by_night': int,
+            'latitude': float, 'longitude': float
             }
 
     def preloop(self):
@@ -75,7 +75,7 @@ class HBNBCommand(cmd.Cmd):
                     # check for *args or **kwargs
                     if pline[0] is '{' and pline[-1] is'}'\
                             and type(eval(pline)) is dict:
-                        _args = pline
+                                _args = pline
                     else:
                         _args = pline.replace(',', '')
                         # _args = _args.replace('\"', '')
@@ -112,6 +112,7 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         """ Overrides the emptyline method of CMD """
         pass
+<<<<<<< HEAD
         """ Help information for the create method """
         print("Creates a class of any type")
         print("[Usage]: create <className>\n")
@@ -167,33 +168,66 @@ def do_create(self, args):
         new = args.partition(" ")
         c_name = new[0]
         c_id = new[2]
+=======
 
-        # guard against trailing args
-        if c_id and ' ' in c_id:
-            c_id = c_id.partition(' ')[0]
+    def do_create(self, line):
+        """ Create a <class> <key1>=<value1> <key2>=<value2> ...
+    Create a new class instance with given keys/values and print its id
+    """
+    try:
+        if not line:
+            raise SyntaxError("Usage: create <Class name> <param1>=<value1> <param2>=<value2> ...")
 
-        if not c_name:
-            print("** class name missing **")
-            return
+        # Split the input line by spaces
+        parts = line.split()
+>>>>>>> 05513f47b9fa73c090fa0af401748e155ed90f3f
 
-        if c_name not in HBNBCommand.classes:
+        # Extract class name
+        class_name = parts[0]
+
+        # Check if class exists
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
-        if not c_id:
-            print("** instance id missing **")
-            return
+        # Extract parameters
+        params = {}
+        for item in parts[1:]:
+            try:
+                key, value = item.split('=')
 
-        key = c_name + "." + c_id
-        try:
-            print(storage._FileStorage__objects[key])
-        except KeyError:
-            print("** no instance found **")
+                # Process value according to its type
+                if value.startswith('"') and value.endswith('"'):
+                    # String value
+                    value = value[1:-1].replace("_", " ").replace('\\"', '"')
+                elif '.' in value:
+                    # Float value
+                    value = float(value)
+                else:
+                    # Integer value
+                    value = int(value)
 
-    def help_show(self):
-        """ Help information for the show command """
-        print("Shows an individual instance of a class")
-        print("[Usage]: show <className> <objectId>\n")
+                # Add key-value pair to params dictionary
+                params[key] = value
+            except ValueError:
+                # Skip if parameter can't be recognized
+                continue
+
+        # Create class instance with given parameters
+        obj = HBNBCommand.classes[class_name](**params)
+
+        # Add object to storage
+        storage.new(obj)
+        storage.save()
+
+        # Print object id
+        print(obj.id)
+
+    except SyntaxError as e:
+        print(e)
+    except Exception as e:
+        print("Error:", e)
+
 
     def do_destroy(self, args):
         """ Destroys a specified object """
