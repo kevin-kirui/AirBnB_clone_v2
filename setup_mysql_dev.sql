@@ -1,4 +1,3 @@
-
 -- Creates a MySQL server with:
 --   Database hbnb_dev_db.
 --   User hbnb_dev with password hbnb_dev_pwd in localhost.
@@ -6,13 +5,7 @@
 --   Grants SELECT privilege for hbnb_dev on performance.
 
 -- Connect to the MySQL server as root
-db = MySQLdb.connect(
-	host='localhost',
-	port=3306,
-	db='HBNB_MYSQL_DB',
-	user='root',
-	passwd='HBNB_MYSQL_PWD'
-)
+db = MySQLdb.connect(host='localhost',port=3306,user='root',passwd='hbnb_dev_pwd')
 
 -- Create a cursor object to execute queries
 cursor = db.cursor()
