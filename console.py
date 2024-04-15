@@ -117,51 +117,34 @@ class HBNBCommand(cmd.Cmd):
         print("Creates a class of any type")
         print("[Usage]: create <className>\n")
 
-def do_create(self, args):
-    """ Create an object of any class with given parameters"""
-    if not args:
-        print("** class name missing **")
-        return
-
-    args_list = args.split()
-
-    class_name = args_list[0]
-    params = args_list[1:]
-
-    if class_name not in HBNBCommand.classes:
-        print("** class doesn't exist **")
-        return
-
-    param_dict = {}
-
-    for param in params:
-        key_value = param.split('=')
-
-        if len(key_value) != 2:
-            continue
-
-        key, value = key_value
-
-        key = key.replace('_', ' ')
-
-        if value.startswith('"') and value.endswith('"'):
-            value = value[1:-1].replace('\\"', '"')
-
+     def do_create(self, line):
+        """Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
+        Create a new class instance with given keys/values and print its id.
+        """
         try:
-            if '.' in value:
-                value = float(value)
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
+
+            kwargs = {}
+            for i in range(1, len(my_list)):
+                key, value = tuple(my_list[i].split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
+
+            if kwargs == {}:
+                obj = eval(my_list[0])()
             else:
-                value = int(value)
-        except ValueError:
-            pass
-
-        param_dict[key] = value
-
-    new_instance = HBNBCommand.classes[class_name](**param_dict)
-
-    storage.save()
-
-    print(new_instance.id)
+                obj = eval(my_list[0])(**kwargs)
+                storage.new(obj)
+            print(obj.id)
+            obj.save()
 
     def do_show(self, args):
         """ Method to show an individual object """
