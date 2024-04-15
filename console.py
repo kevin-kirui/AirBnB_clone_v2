@@ -112,7 +112,6 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         """ Overrides the emptyline method of CMD """
         pass
-<<<<<<< HEAD
         """ Help information for the create method """
         print("Creates a class of any type")
         print("[Usage]: create <className>\n")
