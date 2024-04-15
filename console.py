@@ -117,8 +117,8 @@ class HBNBCommand(cmd.Cmd):
         print("Creates a class of any type")
         print("[Usage]: create <className>\n")
 
-     def do_create(self, line):
-        """Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
+        def do_create(self, line):
+            """Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
         Create a new class instance with given keys/values and print its id.
         """
         try:
@@ -146,70 +146,41 @@ class HBNBCommand(cmd.Cmd):
             print(obj.id)
             obj.save()
 
-    def do_show(self, args):
-        """ Method to show an individual object """
-        new = args.partition(" ")
-        c_name = new[0]
-        c_id = new[2]
-=======
-
-    def do_create(self, line):
-        """ Create a <class> <key1>=<value1> <key2>=<value2> ...
-    Create a new class instance with given keys/values and print its id
-    """
-    try:
-        if not line:
-            raise SyntaxError("Usage: create <Class name> <param1>=<value1> <param2>=<value2> ...")
-
-        # Split the input line by spaces
-        parts = line.split()
->>>>>>> 05513f47b9fa73c090fa0af401748e155ed90f3f
-
-        # Extract class name
-        class_name = parts[0]
-
-        # Check if class exists
-        if class_name not in HBNBCommand.classes:
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
             print("** class doesn't exist **")
-            return
 
-        # Extract parameters
-        params = {}
-        for item in parts[1:]:
-            try:
-                key, value = item.split('=')
-
-                # Process value according to its type
-                if value.startswith('"') and value.endswith('"'):
-                    # String value
-                    value = value[1:-1].replace("_", " ").replace('\\"', '"')
-                elif '.' in value:
-                    # Float value
-                    value = float(value)
-                else:
-                    # Integer value
-                    value = int(value)
-
-                # Add key-value pair to params dictionary
-                params[key] = value
-            except ValueError:
-                # Skip if parameter can't be recognized
-                continue
-
-        # Create class instance with given parameters
-        obj = HBNBCommand.classes[class_name](**params)
-
-        # Add object to storage
-        storage.new(obj)
-        storage.save()
-
-        # Print object id
-        print(obj.id)
-
-    except SyntaxError as e:
-        print(e)
-    except Exception as e:
-        print("Error:", e)
+    def do_show(self, line):
+        """Prints the string representation of an instance
+        Exceptions:
+            SyntaxError: when there is no args given
+            NameError: when there is no object taht has the name
+            IndexError: when there is no id given
+            KeyError: when there is no valid id given
+        """
+        try:
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
+            if my_list[0] not in self.__classes:
+                raise NameError()
+            if len(my_list) < 2:
+                raise IndexError()
+            objects = storage.all()
+            key = my_list[0] + '.' + my_list[1]
+            if key in objects:
+                print(objects[key])
+            else:
+                raise KeyError()
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
+            print("** class doesn't exist **")
+        except IndexError:
+            print("** instance id missing **")
+        except KeyError:
+            print("** no instance found **")
 
 
     def do_destroy(self, args):
